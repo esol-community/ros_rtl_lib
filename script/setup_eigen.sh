@@ -1,0 +1,25 @@
+#!/bin/bash
+set -e
+
+LIB_NAME=eigen
+SRC_VER=3.3.4
+SRC_DIR=eigen-eigen-5a0156e40feb
+ARC_NAME=eigen_${SRC_VER}.orig.tar.bz2
+SRC_ARC=${ARC_DIR}/${ARC_NAME}
+
+CMAKE_LOG=log_cmake_${LIB_NAME}.log
+MAKE_LOG=log_make_${LIB_NAME}.log
+INST_LOG=log_install_${LIB_NAME}.log
+
+if [ -d ${PWD}/${SRC_DIR} ]; then
+    rm -rf ${PWD}/${SRC_DIR}
+fi
+tar xf ${SRC_ARC}
+
+if [ -d ${PWD}/build ]; then
+    rm -rf ${PWD}/build
+fi
+mkdir build; cd $_
+
+cmake -DCMAKE_FIND_DEBUG_MODE=1 -DCMAKE_TOOLCHAIN_FILE=${BUILD_TOOLCHAIN_PATH} -DCMAKE_INSTALL_PREFIX=${BUILD_LIB_PREFIX} -D_CMAKE_MCOS_ROS_RTL=1 ../${SRC_DIR} > ../log_cmake_eigen.log 2>&1
+make install > ../log_install_eigen.log 2>&1

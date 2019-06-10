@@ -1,0 +1,86 @@
+diff --git googlemock/CMakeLists.txt googlemock/CMakeLists.txt
+index bac2e3b..5d67005 100644
+--- googlemock/CMakeLists.txt
++++ googlemock/CMakeLists.txt
+@@ -110,8 +110,12 @@ endif()
+ # to the targets for when we are part of a parent build (ie being pulled
+ # in via add_subdirectory() rather than being a standalone build).
+ if (DEFINED CMAKE_VERSION AND NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
+-  target_include_directories(gmock      SYSTEM INTERFACE "${gmock_SOURCE_DIR}/include")
+-  target_include_directories(gmock_main SYSTEM INTERFACE "${gmock_SOURCE_DIR}/include")
++  ## Modified to disable errors due to our unstable header files
++  ## outputting many warnings.
++  #target_include_directories(gmock      SYSTEM INTERFACE "${gmock_SOURCE_DIR}/include")
++  #target_include_directories(gmock_main SYSTEM INTERFACE "${gmock_SOURCE_DIR}/include")
++  target_include_directories(gmock      INTERFACE "${gmock_SOURCE_DIR}/include")
++  target_include_directories(gmock_main INTERFACE "${gmock_SOURCE_DIR}/include")
+ endif()
+ 
+ ########################################################################
+diff --git googlemock/make/Makefile googlemock/make/Makefile
+index 7c13e05..d08cdd3 100644
+--- googlemock/make/Makefile
++++ googlemock/make/Makefile
+@@ -30,7 +30,10 @@ USER_DIR = ../test
+ # Set Google Test and Google Mock's header directories as system
+ # directories, such that the compiler doesn't generate warnings in
+ # these headers.
+-CPPFLAGS += -isystem $(GTEST_DIR)/include -isystem $(GMOCK_DIR)/include
++## Modified to disable errors due to our unstable header files
++## outputting many warnings.
++##CPPFLAGS += -isystem $(GTEST_DIR)/include -isystem $(GMOCK_DIR)/include
++CPPFLAGS += -I $(GTEST_DIR)/include -I $(GMOCK_DIR)/include
+ 
+ # Flags passed to the C++ compiler.
+ CXXFLAGS += -g -Wall -Wextra -pthread
+diff --git googletest/CMakeLists.txt googletest/CMakeLists.txt
+index 77b55ca..0695710 100644
+--- googletest/CMakeLists.txt
++++ googletest/CMakeLists.txt
+@@ -105,8 +105,12 @@ target_link_libraries(gtest_main gtest)
+ # to the targets for when we are part of a parent build (ie being pulled
+ # in via add_subdirectory() rather than being a standalone build).
+ if (DEFINED CMAKE_VERSION AND NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
+-  target_include_directories(gtest      SYSTEM INTERFACE "${gtest_SOURCE_DIR}/include")
+-  target_include_directories(gtest_main SYSTEM INTERFACE "${gtest_SOURCE_DIR}/include")
++  ## Modified to disable errors due to our unstable header files
++  ## outputting many warnings.
++  #target_include_directories(gtest      SYSTEM INTERFACE "${gtest_SOURCE_DIR}/include")
++  #target_include_directories(gtest_main SYSTEM INTERFACE "${gtest_SOURCE_DIR}/include")
++  target_include_directories(gtest      INTERFACE "${gtest_SOURCE_DIR}/include")
++  target_include_directories(gtest_main INTERFACE "${gtest_SOURCE_DIR}/include")
+ endif()
+ 
+ ########################################################################
+diff --git googletest/cmake/internal_utils.cmake googletest/cmake/internal_utils.cmake
+index c54bc94..2ac6dc4 100644
+--- googletest/cmake/internal_utils.cmake
++++ googletest/cmake/internal_utils.cmake
+@@ -94,7 +94,10 @@ macro(config_compiler_and_linker)
+     set(cxx_no_exception_flags "-D_HAS_EXCEPTIONS=0")
+     set(cxx_no_rtti_flags "-GR-")
+   elseif (CMAKE_COMPILER_IS_GNUCXX)
+-    set(cxx_base_flags "-Wall -Wshadow -Werror")
++    ## Modified to disable errors due to our unstable header files
++    ## outputting many warnings.
++    ##set(cxx_base_flags "-Wall -Wshadow -Werror")
++    set(cxx_base_flags "-Wall -Wshadow")
+     set(cxx_exception_flags "-fexceptions")
+     set(cxx_no_exception_flags "-fno-exceptions")
+     # Until version 4.3.2, GCC doesn't define a macro to indicate
+diff --git googletest/make/Makefile googletest/make/Makefile
+index 9ac7449..868269e 100644
+--- googletest/make/Makefile
++++ googletest/make/Makefile
+@@ -22,7 +22,10 @@ USER_DIR = ../samples
+ # Flags passed to the preprocessor.
+ # Set Google Test's header directory as a system directory, such that
+ # the compiler doesn't generate warnings in Google Test headers.
+-CPPFLAGS += -isystem $(GTEST_DIR)/include
++## Modified to disable errors due to our unstable header files
++## outputting many warnings.
++#CPPFLAGS += -isystem $(GTEST_DIR)/include
++CPPFLAGS += -I $(GTEST_DIR)/include
+ 
+ # Flags passed to the C++ compiler.
+ CXXFLAGS += -g -Wall -Wextra -pthread

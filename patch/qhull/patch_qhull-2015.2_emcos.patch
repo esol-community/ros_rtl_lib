@@ -1,0 +1,45 @@
+diff -uprN qhull-2015.2/CMakeLists.txt changed_qhull-2015.2/CMakeLists.txt
+--- qhull-2015.2/CMakeLists.txt	2018-06-14 08:16:41.947160338 +0000
++++ changed_qhull-2015.2/CMakeLists.txt	2018-06-14 08:13:16.084164248 +0000
+@@ -380,6 +380,9 @@ if(UNIX)
+             BUILD_WITH_INSTALL_RPATH FALSE)
+     endif()
+ endif(UNIX)
++if(_CMAKE_MCOS_ROS_RTL)
++    target_link_libraries(${qhull_SHAREDR} m)
++endif(_CMAKE_MCOS_ROS_RTL)
+ 
+ # ---------------------------------------
+ # Define shared library for non-reentrant qhull without qh_QHpointer
+@@ -411,6 +414,9 @@ if(UNIX)
+             BUILD_WITH_INSTALL_RPATH FALSE)
+     endif()
+ endif(UNIX)
++if(_CMAKE_MCOS_ROS_RTL)
++    target_link_libraries(${qhull_SHARED} m)
++endif(_CMAKE_MCOS_ROS_RTL)
+ 
+ # ---------------------------------------
+ # Define old shared library qhull with qh_QHpointer
+@@ -436,7 +442,9 @@ if(UNIX)
+             BUILD_WITH_INSTALL_RPATH FALSE)
+     endif()
+ endif(UNIX)
+-
++if(_CMAKE_MCOS_ROS_RTL)
++    target_link_libraries(${qhull_SHAREDP} m)
++endif(_CMAKE_MCOS_ROS_RTL)
+ # ---------------------------------------
+ # Define static libraries qhullstatic (non-reentrant) and qhullstatic_r (reentrant)
+ # ---------------------------------------
+@@ -453,6 +461,10 @@ if(UNIX)
+     target_link_libraries(${qhull_STATIC} m)
+     target_link_libraries(${qhull_STATICR} m)
+ endif(UNIX)
++if(_CMAKE_MCOS_ROS_RTL)
++    target_link_libraries(${qhull_STATIC} m)
++    target_link_libraries(${qhull_STATICR} m)
++endif(_CMAKE_MCOS_ROS_RTL)
+ 
+ # ---------------------------------------
+ # Define C++ static library qhullcpp

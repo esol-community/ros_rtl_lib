@@ -1,0 +1,71 @@
+diff -uprN poco-1.8.0.1-all/CMakeLists.txt changed_poco-1.8.0.1-all/CMakeLists.txt
+--- poco-1.8.0.1-all/CMakeLists.txt	2017-11-11 17:27:04.000000000 +0000
++++ changed_poco-1.8.0.1-all/CMakeLists.txt	2018-06-15 01:25:30.235282730 +0000
+@@ -86,27 +86,27 @@ endif()
+ include(PocoMacros)
+ 
+ # Allow enabling and disabling components
+-option(ENABLE_XML "Enable the XML" ON)
+-option(ENABLE_JSON "Enable the JSON" ON)
+-option(ENABLE_MONGODB "Enable MongoDB" ON)
+-option(ENABLE_REDIS "Enable Redis" ON)
++option(ENABLE_XML "Enable the XML" OFF)
++option(ENABLE_JSON "Enable the JSON" OFF)
++option(ENABLE_MONGODB "Enable MongoDB" OFF)
++option(ENABLE_REDIS "Enable Redis" OFF)
+ option(ENABLE_PDF "Enable PDF" OFF)
+-option(ENABLE_UTIL "Enable Util" ON)
+-option(ENABLE_NET "Enable Net" ON)
+-option(ENABLE_NETSSL "Enable NetSSL" ON)
++option(ENABLE_UTIL "Enable Util" OFF)
++option(ENABLE_NET "Enable Net" OFF)
++option(ENABLE_NETSSL "Enable NetSSL" OFF)
+ option(ENABLE_NETSSL_WIN "Enable NetSSL Windows" OFF)
+-option(ENABLE_CRYPTO "Enable Crypto" ON)
+-option(ENABLE_DATA "Enable Data" ON)
+-option(ENABLE_DATA_SQLITE "Enable Data SQlite" ON)
+-option(ENABLE_DATA_MYSQL "Enable Data MySQL" ON)
+-option(ENABLE_DATA_ODBC "Enable Data ODBC" ON)
++option(ENABLE_CRYPTO "Enable Crypto" OFF)
++option(ENABLE_DATA "Enable Data" OFF)
++option(ENABLE_DATA_SQLITE "Enable Data SQlite" OFF)
++option(ENABLE_DATA_MYSQL "Enable Data MySQL" OFF)
++option(ENABLE_DATA_ODBC "Enable Data ODBC" OFF)
+ option(ENABLE_SEVENZIP "Enable SevenZip" OFF)
+-option(ENABLE_ZIP "Enable Zip" ON)
++option(ENABLE_ZIP "Enable Zip" OFF)
+ option(ENABLE_APACHECONNECTOR "Enable ApacheConnector" OFF)
+ option(ENABLE_CPPPARSER "Enable C++ parser" OFF)
+ option(ENABLE_POCODOC "Enable Poco Documentation Generator" OFF)
+-option(ENABLE_PAGECOMPILER "Enable PageCompiler" ON)
+-option(ENABLE_PAGECOMPILER_FILE2PAGE "Enable File2Page" ON)
++option(ENABLE_PAGECOMPILER "Enable PageCompiler" OFF)
++option(ENABLE_PAGECOMPILER_FILE2PAGE "Enable File2Page" OFF)
+ 
+ option(FORCE_OPENSSL "Force usage of OpenSSL even under windows" OFF)
+ 
+@@ -114,7 +114,7 @@ option(ENABLE_TESTS
+   "Set to OFF|ON (default is OFF) to control build of POCO tests & samples" OFF)
+ 
+ option(POCO_STATIC
+-  "Set to OFF|ON (default is OFF) to control build of POCO as STATIC library" OFF)
++  "Set to OFF|ON (default is OFF) to control build of POCO as STATIC library" ON)
+ 
+ option(POCO_UNBUNDLED
+   "Set to OFF|ON (default is OFF) to control linking dependencies as external" OFF)
+diff -uprN poco-1.8.0.1-all/Foundation/src/File_UNIX.cpp changed_poco-1.8.0.1-all/Foundation/src/File_UNIX.cpp
+--- poco-1.8.0.1-all/Foundation/src/File_UNIX.cpp	2017-11-11 17:27:05.000000000 +0000
++++ changed_poco-1.8.0.1-all/Foundation/src/File_UNIX.cpp	2018-06-15 01:25:21.075427500 +0000
+@@ -322,8 +322,11 @@ void FileImpl::copyToImpl(const std::str
+ 		close(sd);
+ 		handleLastErrorImpl(_path);
+ 	}
++#if !defined(_MCOS_ROS_RTL)
+ 	const long blockSize = st.st_blksize;
+-
++#else /* !defined(_MCOS_ROS_RTL) */
++	const long blockSize = 512;
++#endif /* !defined(_MCOS_ROS_RTL)*/
+ 	int dd = open(path.c_str(), O_CREAT | O_TRUNC | O_WRONLY, st.st_mode);
+ 	if (dd == -1)
+ 	{

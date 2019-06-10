@@ -1,0 +1,16 @@
+diff -uprN urdfdom-0.4.1/urdf_parser/CMakeLists.txt urdfdom-0.4.1_changed/urdf_parser/CMakeLists.txt
+--- urdfdom-0.4.1/urdf_parser/CMakeLists.txt	2018-08-01 02:04:00.150783573 +0000
++++ urdfdom-0.4.1_changed/urdf_parser/CMakeLists.txt	2018-08-01 02:02:51.047461207 +0000
+@@ -28,10 +28,12 @@ target_link_libraries(urdf_to_graphiz ur
+ add_executable(urdf_mem_test test/memtest.cpp)
+ target_link_libraries(urdf_mem_test urdfdom_model)
+ 
++if(NOT _CMAKE_MCOS_ROS_RTL)
+ # unit test to fix geometry problems
+ add_executable(urdf_unit_test test/urdf_unit_test.cpp)
+ target_link_libraries(urdf_unit_test urdfdom_model ${Boost_LIBRARIES})
+ add_test(urdf_unit_test urdf_unit_test)
++endif(NOT _CMAKE_MCOS_ROS_RTL)
+ 
+ INSTALL(TARGETS urdfdom_model DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ INSTALL(TARGETS urdfdom_world DESTINATION ${CMAKE_INSTALL_LIBDIR})

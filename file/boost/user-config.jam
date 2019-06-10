@@ -1,0 +1,29 @@
+using gcc : arm : aarch64-elf-mcos-g++ :
+    <architecture>arm
+    <address-model>64
+    <root>/opt/aarch64_mcos
+    <compileflags>-D__linux__
+    <compileflags>-DBOOST_TEST_DISABLE_ALT_STACK
+    <linkflags>-umain
+    <linkflags>-upthread_cancel
+    <linkflags>-upthread_cond_broadcast
+    <linkflags>-upthread_cond_destroy
+    <linkflags>-upthread_cond_signal
+    <linkflags>-upthread_cond_wait
+    <linkflags>-upthread_create
+    <linkflags>-upthread_detach
+    <linkflags>-upthread_equal
+    <linkflags>-upthread_getspecific
+    <linkflags>-upthread_join
+    <linkflags>-upthread_key_create
+    <linkflags>-upthread_key_delete
+    <linkflags>-upthread_mutex_init
+    <linkflags>-upthread_mutex_lock
+    <linkflags>-upthread_mutex_unlock
+    <linkflags>-upthread_mutexattr_destroy
+    <linkflags>-upthread_mutexattr_init
+    <linkflags>-upthread_mutexattr_settype
+    <linkflags>-upthread_once
+    <linkflags>-upthread_setspecific
+    ;
+

@@ -1,0 +1,306 @@
+diff -uprN pcl-1.7.2/cmake/Modules/FindEigen.cmake changed_pcl-1.7.2/cmake/Modules/FindEigen.cmake
+--- pcl-1.7.2/cmake/Modules/FindEigen.cmake	2018-06-13 07:10:53.057516668 +0000
++++ changed_pcl-1.7.2/cmake/Modules/FindEigen.cmake	2018-06-05 05:09:51.000000000 +0000
+@@ -6,10 +6,11 @@
+ # EIGEN_INCLUDE_DIRS - Directories containing the Eigen include files.
+ # EIGEN_DEFINITIONS - Compiler flags for Eigen.
+ # EIGEN_VERSION - Package version
+-
++if(NOT _CMAKE_MCOS_ROS_RTL)
+ find_package(PkgConfig QUIET)
+ pkg_check_modules(PC_EIGEN eigen3)
+ set(EIGEN_DEFINITIONS ${PC_EIGEN_CFLAGS_OTHER})
++endif(NOT _CMAKE_MCOS_ROS_RTL)
+ 
+ if(CMAKE_SYSTEM_NAME STREQUAL Linux)
+     set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} /usr /usr/local)
+@@ -19,11 +20,19 @@ if(APPLE)
+   set(CMAKE_FIND_FRAMEWORK NEVER)
+ endif()
+ 
++if(NOT _CMAKE_MCOS_ROS_RTL)
++find_path(EIGEN_INCLUDE_DIR Eigen/Core
++    HINTS ${PC_EIGEN_INCLUDE_DIRS} "${EIGEN_ROOT}" "$ENV{EIGEN_ROOT}"
++    PATHS "$ENV{PROGRAMFILES}/Eigen" "$ENV{PROGRAMW6432}/Eigen"
++          "$ENV{PROGRAMFILES}/Eigen 3.0.0" "$ENV{PROGRAMW6432}/Eigen 3.0.0"
++    PATH_SUFFIXES eigen3 include/eigen3 include)
++else(NOT _CMAKE_MCOS_ROS_RTL)
+ find_path(EIGEN_INCLUDE_DIR Eigen/Core
+-    HINTS ${PC_EIGEN_INCLUDEDIR} ${PC_EIGEN_INCLUDE_DIRS} "${EIGEN_ROOT}" "$ENV{EIGEN_ROOT}"
++    HINTS "${EIGEN_ROOT}" ${PC_EIGEN_INCLUDE_DIRS} "$ENV{EIGEN_ROOT}"
+     PATHS "$ENV{PROGRAMFILES}/Eigen" "$ENV{PROGRAMW6432}/Eigen"
+           "$ENV{PROGRAMFILES}/Eigen 3.0.0" "$ENV{PROGRAMW6432}/Eigen 3.0.0"
+     PATH_SUFFIXES eigen3 include/eigen3 include)
++endif(NOT _CMAKE_MCOS_ROS_RTL)
+ 
+ if(EIGEN_INCLUDE_DIR)
+   file(READ "${EIGEN_INCLUDE_DIR}/Eigen/src/Core/util/Macros.h" _eigen_version_header)
+diff -uprN pcl-1.7.2/cmake/Modules/FindFLANN.cmake changed_pcl-1.7.2/cmake/Modules/FindFLANN.cmake
+--- pcl-1.7.2/cmake/Modules/FindFLANN.cmake	2018-06-13 07:10:53.057516668 +0000
++++ changed_pcl-1.7.2/cmake/Modules/FindFLANN.cmake	2018-06-05 06:13:30.000000000 +0000
+@@ -17,15 +17,18 @@ else(FLANN_USE_STATIC)
+   set(FLANN_DEBUG_NAME flann_cpp-gd)
+ endif(FLANN_USE_STATIC)
+ 
++if(NOT _CMAKE_MCOS_ROS_RTL)
+ find_package(PkgConfig QUIET)
+ if (FLANN_FIND_VERSION)
+     pkg_check_modules(PC_FLANN flann>=${FLANN_FIND_VERSION})
+ else(FLANN_FIND_VERSION)
+     pkg_check_modules(PC_FLANN flann)
+ endif(FLANN_FIND_VERSION)
++endif(NOT _CMAKE_MCOS_ROS_RTL)
+ 
+ set(FLANN_DEFINITIONS ${PC_FLANN_CFLAGS_OTHER})
+ 
++if(NOT _CMAKE_MCOS_ROS_RTL)
+ find_path(FLANN_INCLUDE_DIR flann/flann.hpp
+           HINTS ${PC_FLANN_INCLUDEDIR} ${PC_FLANN_INCLUDE_DIRS} "${FLANN_ROOT}" "$ENV{FLANN_ROOT}"
+           PATHS "$ENV{PROGRAMFILES}/Flann" "$ENV{PROGRAMW6432}/Flann" 
+@@ -42,6 +45,24 @@ find_library(FLANN_LIBRARY_DEBUG
+ 	     HINTS ${PC_FLANN_LIBDIR} ${PC_FLANN_LIBRARY_DIRS} "${FLANN_ROOT}" "$ENV{FLANN_ROOT}"
+ 	     PATHS "$ENV{PROGRAMFILES}/Flann" "$ENV{PROGRAMW6432}/Flann" 
+ 	     PATH_SUFFIXES lib)
++else(NOT _CMAKE_MCOS_ROS_RTL)
++find_path(FLANN_INCLUDE_DIR flann/flann.hpp
++          HINTS "${FLANN_ROOT}" ${PC_FLANN_INCLUDEDIR} ${PC_FLANN_INCLUDE_DIRS} "$ENV{FLANN_ROOT}"
++          PATHS "$ENV{PROGRAMFILES}/Flann" "$ENV{PROGRAMW6432}/Flann" 
++          PATH_SUFFIXES include)
++
++find_library(FLANN_LIBRARY
++             NAMES ${FLANN_RELEASE_NAME}
++             HINTS "${FLANN_ROOT}" ${PC_FLANN_LIBDIR} ${PC_FLANN_LIBRARY_DIRS} "$ENV{FLANN_ROOT}"
++             PATHS "$ENV{PROGRAMFILES}/Flann" "$ENV{PROGRAMW6432}/Flann" 
++	     PATH_SUFFIXES lib)
++
++find_library(FLANN_LIBRARY_DEBUG 
++             NAMES ${FLANN_DEBUG_NAME} ${FLANN_RELEASE_NAME}
++	     HINTS "${FLANN_ROOT}" ${PC_FLANN_LIBDIR} ${PC_FLANN_LIBRARY_DIRS} "$ENV{FLANN_ROOT}"
++	     PATHS "$ENV{PROGRAMFILES}/Flann" "$ENV{PROGRAMW6432}/Flann" 
++	     PATH_SUFFIXES lib)
++endif(NOT _CMAKE_MCOS_ROS_RTL)
+ 
+ if(NOT FLANN_LIBRARY_DEBUG)
+   set(FLANN_LIBRARY_DEBUG ${FLANN_LIBRARY})
+diff -uprN pcl-1.7.2/CMakeLists.txt changed_pcl-1.7.2/CMakeLists.txt
+--- pcl-1.7.2/CMakeLists.txt	2018-06-13 07:10:53.041516838 +0000
++++ changed_pcl-1.7.2/CMakeLists.txt	2018-06-07 08:47:11.058557444 +0000
+@@ -104,9 +104,11 @@ if(CMAKE_COMPILER_IS_GNUCXX)
+     endif ()
+   endif()
+ 
++  if(NOT _CMAKE_MCOS_ROS_RTL)
+   if(NOT ANDROID)
+     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+   endif(NOT ANDROID)
++  endif(NOT _CMAKE_MCOS_ROS_RTL)
+ 
+   if(WIN32)
+     if(PCL_SHARED_LIBS)
+@@ -246,11 +248,19 @@ add_definitions(-DEIGEN_USE_NEW_STDVECTO
+ if(NOT PCL_SHARED_LIBS OR (WIN32 AND NOT MINGW))
+   set(FLANN_USE_STATIC ON)
+ endif(NOT PCL_SHARED_LIBS OR (WIN32 AND NOT MINGW))
++if(NOT _CMAKE_MCOS_ROS_RTL)
++  set(FLANN_USE_STATIC ON)
++endif(NOT _CMAKE_MCOS_ROS_RTL)
+ find_package(FLANN 1.7.0 REQUIRED)
+ include_directories(${FLANN_INCLUDE_DIRS})
+ 
++
+ # libusb-1.0
++if(NOT _CMAKE_MCOS_ROS_RTL)
+ option(WITH_LIBUSB "Build USB RGBD-Camera drivers" TRUE)
++else(NOT _CMAKE_MCOS_ROS_RTL)
++option(WITH_LIBUSB "Build USB RGBD-Camera drivers" FALSE)
++endif(NOT _CMAKE_MCOS_ROS_RTL)
+ if(WITH_LIBUSB)
+   find_package(libusb-1.0)
+   if(LIBUSB_1_FOUND)
+@@ -259,7 +269,11 @@ if(WITH_LIBUSB)
+ endif(WITH_LIBUSB)
+ 
+ # OpenNI
++if(NOT _CMAKE_MCOS_ROS_RTL)
+ option(WITH_OPENNI "OpenNI driver support" TRUE)
++else(NOT _CMAKE_MCOS_ROS_RTL)
++option(WITH_OPENNI "OpenNI driver support" FALSE)
++endif(NOT _CMAKE_MCOS_ROS_RTL)
+ if(WITH_OPENNI)
+   find_package(OpenNI)
+   if (OPENNI_FOUND)
+@@ -269,7 +283,11 @@ if(WITH_OPENNI)
+ endif(WITH_OPENNI)
+ 
+ # OpenNI 2
++if(NOT _CMAKE_MCOS_ROS_RTL)
+ option(WITH_OPENNI2 "OpenNI 2 driver support" TRUE)
++else(NOT _CMAKE_MCOS_ROS_RTL)
++option(WITH_OPENNI2 "OpenNI 2 driver support" FALSE)
++endif(NOT _CMAKE_MCOS_ROS_RTL)
+ if(WITH_OPENNI2)
+   find_package(OpenNI2)
+   if (OPENNI2_FOUND)
+@@ -279,7 +297,11 @@ if(WITH_OPENNI2)
+ endif(WITH_OPENNI2)
+ 
+ # Fotonic (FZ_API)
++if(NOT _CMAKE_MCOS_ROS_RTL)
+ option(WITH_FZAPI "Build Fotonic Camera support" TRUE)
++else(NOT _CMAKE_MCOS_ROS_RTL)
++option(WITH_FZAPI "Build Fotonic Camera support" FALSE)
++endif(NOT _CMAKE_MCOS_ROS_RTL)
+ if(WITH_FZAPI)
+   find_package(FZAPI)
+   if (FZAPI_FOUND)
+@@ -289,7 +311,11 @@ if(WITH_FZAPI)
+ endif(WITH_FZAPI)
+ 
+ # Intel Perceptional Computing Interface (PXCAPI)
++if(NOT _CMAKE_MCOS_ROS_RTL)
+ option(WITH_PXCAPI "Build PXC Device support" TRUE)
++else(NOT _CMAKE_MCOS_ROS_RTL)
++option(WITH_PXCAPI "Build PXC Device support" FALSE)
++endif(NOT _CMAKE_MCOS_ROS_RTL)
+ if(WITH_PXCAPI)
+   find_package(PXCAPI)
+   if (PXCAPI_FOUND)
+@@ -312,7 +338,11 @@ else()
+ endif()
+ 
+ # LibPNG
++if(NOT _CMAKE_MCOS_ROS_RTL)
+ option(WITH_PNG "PNG file support" TRUE)
++else(NOT _CMAKE_MCOS_ROS_RTL)
++option(WITH_PNG "PNG file support" FALSE)
++endif(NOT _CMAKE_MCOS_ROS_RTL)
+ if(WITH_PNG)
+   find_package(PNG)
+   if (PNG_FOUND)
+@@ -330,7 +360,11 @@ if(WITH_QHULL)
+   find_package(Qhull)
+ endif(WITH_QHULL)
+ 
++if(NOT _CMAKE_MCOS_ROS_RTL)
+ option(WITH_QT "Build QT Front-End" TRUE)
++else(NOT _CMAKE_MCOS_ROS_RTL)
++option(WITH_QT "Build QT Front-End" FALSE)
++endif(NOT _CMAKE_MCOS_ROS_RTL)
+ if(WITH_QT)
+   # Find Qt4
+   find_package(Qt4)
+@@ -345,7 +379,11 @@ if(WITH_QT)
+ endif(WITH_QT)
+ 
+ # Find VTK
++if(NOT _CMAKE_MCOS_ROS_RTL)
+ option(WITH_VTK "Build VTK-Visualizations" TRUE)
++else(NOT _CMAKE_MCOS_ROS_RTL)
++option(WITH_VTK "Build VTK-Visualizations" FALSE)
++endif(NOT _CMAKE_MCOS_ROS_RTL)
+ if(WITH_VTK AND NOT ANDROID)
+   find_package(VTK)
+   if(VTK_FOUND)
+@@ -380,13 +418,19 @@ endif(WITH_VTK AND NOT ANDROID)
+ 
+ 
+ #Find PCAP
++if(NOT _CMAKE_MCOS_ROS_RTL)
+ option(WITH_PCAP "pcap file capabilities in Velodyne HDL driver" TRUE)
++else(NOT _CMAKE_MCOS_ROS_RTL)
++option(WITH_PCAP "pcap file capabilities in Velodyne HDL driver" FALSE)
++endif(NOT _CMAKE_MCOS_ROS_RTL)
+ if(WITH_PCAP)
+   find_package(Pcap)
+ endif(WITH_PCAP)
+ 
++if(NOT _CMAKE_MCOS_ROS_RTL)
+ # OpenGL and GLUT
+ include("${PCL_SOURCE_DIR}/cmake/pcl_find_gl.cmake")
++endif(NOT _CMAKE_MCOS_ROS_RTL)
+ 
+ ### ---[ Create the config.h file
+ set(pcl_config_h_in "${CMAKE_CURRENT_SOURCE_DIR}/pcl_config.h.in")
+diff -uprN pcl-1.7.2/common/include/pcl/common/impl/file_io.hpp pcl-1.7.2/common/include/pcl/common/impl/file_io.hpp
+--- pcl-1.7.2/common/include/pcl/common/impl/file_io.hpp	2018-06-13 07:10:53.065516584 +0000
++++ pcl-1.7.2/common/include/pcl/common/impl/file_io.hpp	2018-06-05 06:27:52.000000000 +0000
+@@ -52,12 +52,16 @@ namespace pcl
+       return;
+     }
+     while ((dirp = readdir(dp)) != NULL) {
++#if !defined(_MCOS_ROS_RTL)
+       if (dirp->d_type == DT_REG)  // Only regular files
+       {
++#endif /* !defined(_MCOS_ROS_RTL) */
+         std::string file_name = dirp->d_name;
+         if (file_name.substr(file_name.size()-4, 4)==".pcd")
+           file_names.push_back(dirp->d_name);
++#if !defined(_MCOS_ROS_RTL)
+       }
++#endif /* !defined(_MCOS_ROS_RTL) */
+     }
+     closedir(dp);
+     std::sort(file_names.begin(), file_names.end());
+diff -uprN pcl-1.7.2/PCLConfig.cmake.in changed_pcl-1.7.2/PCLConfig.cmake.in
+--- pcl-1.7.2/PCLConfig.cmake.in	2018-06-13 07:10:53.045516794 +0000
++++ changed_pcl-1.7.2/PCLConfig.cmake.in	2018-06-05 09:14:09.000000000 +0000
+@@ -112,12 +112,21 @@ macro(find_eigen)
+   if(PKG_CONFIG_FOUND)
+     pkg_check_modules(PC_EIGEN eigen3)
+   endif(PKG_CONFIG_FOUND)
++  if(NOT _CMAKE_MCOS_ROS_RTL)
+   find_path(EIGEN_INCLUDE_DIRS Eigen/Core
+     HINTS ${PC_EIGEN_INCLUDEDIR} ${PC_EIGEN_INCLUDE_DIRS} 
+           "${EIGEN_ROOT}" "$ENV{EIGEN_ROOT}"
+     PATHS "$ENV{PROGRAMFILES}/Eigen 3.0.0" "$ENV{PROGRAMW6432}/Eigen 3.0.0"
+           "$ENV{PROGRAMFILES}/Eigen" "$ENV{PROGRAMW6432}/Eigen"   
+     PATH_SUFFIXES eigen3 include/eigen3 include)
++  else(NOT _CMAKE_MCOS_ROS_RTL)
++  find_path(EIGEN_INCLUDE_DIRS Eigen/Core
++    HINTS "${EIGEN_ROOT}" "$ENV{EIGEN_ROOT}" 
++          ${PC_EIGEN_INCLUDEDIR} ${PC_EIGEN_INCLUDE_DIRS}
++    PATHS "$ENV{PROGRAMFILES}/Eigen 3.0.0" "$ENV{PROGRAMW6432}/Eigen 3.0.0"
++          "$ENV{PROGRAMFILES}/Eigen" "$ENV{PROGRAMW6432}/Eigen"   
++    PATH_SUFFIXES eigen3 include/eigen3 include)
++  endif(NOT _CMAKE_MCOS_ROS_RTL)
+   find_package_handle_standard_args(eigen DEFAULT_MSG EIGEN_INCLUDE_DIRS)
+   set(EIGEN_DEFINITIONS ${EIGEN_DEFINITIONS} -DEIGEN_USE_NEW_STDVECTOR 
+       -DEIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET)
+@@ -257,7 +266,7 @@ macro(find_flann)
+   if(PKG_CONFIG_FOUND)
+     pkg_check_modules(PC_FLANN flann)
+   endif(PKG_CONFIG_FOUND)
+-
++  if(NOT _CMAKE_MCOS_ROS_RTL)
+   find_path(FLANN_INCLUDE_DIRS flann/flann.hpp
+     HINTS ${PC_FLANN_INCLUDEDIR} ${PC_FLANN_INCLUDE_DIRS} 
+           "${FLANN_ROOT}" "$ENV{FLANN_ROOT}"
+@@ -278,6 +287,28 @@ macro(find_flann)
+     PATHS "$ENV{PROGRAMFILES}/flann 1.6.9" "$ENV{PROGRAMW6432}/flann 1.6.9" 
+           "$ENV{PROGRAMFILES}/flann" "$ENV{PROGRAMW6432}/flann"
+     PATH_SUFFIXES lib)
++  else(NOT _CMAKE_MCOS_ROS_RTL)
++  find_path(FLANN_INCLUDE_DIRS flann/flann.hpp
++    HINTS "${FLANN_ROOT}" "$ENV{FLANN_ROOT}" 
++          ${PC_FLANN_INCLUDEDIR} ${PC_FLANN_INCLUDE_DIRS}
++    PATHS "$ENV{PROGRAMFILES}/flann 1.6.9" "$ENV{PROGRAMW6432}/flann 1.6.9"
++          "$ENV{PROGRAMFILES}/flann" "$ENV{PROGRAMW6432}/flann"
++    PATH_SUFFIXES include)
++
++  find_library(FLANN_LIBRARY
++    NAMES flann_cpp_s flann_cpp
++    HINTS "${FLANN_ROOT}" "$ENV{FLANN_ROOT}" ${PC_FLANN_LIBDIR} ${PC_FLANN_LIBRARY_DIRS} 
++    PATHS "$ENV{PROGRAMFILES}/flann 1.6.9" "$ENV{PROGRAMW6432}/flann 1.6.9" 
++          "$ENV{PROGRAMFILES}/flann" "$ENV{PROGRAMW6432}/flann"
++    PATH_SUFFIXES lib)
++
++  find_library(FLANN_LIBRARY_DEBUG 
++    NAMES flann_cpp_s-gd flann_cpp-gd flann_cpp_s flann_cpp
++    HINTS "${FLANN_ROOT}" "$ENV{FLANN_ROOT}" ${PC_FLANN_LIBDIR} ${PC_FLANN_LIBRARY_DIRS}
++    PATHS "$ENV{PROGRAMFILES}/flann 1.6.9" "$ENV{PROGRAMW6432}/flann 1.6.9" 
++          "$ENV{PROGRAMFILES}/flann" "$ENV{PROGRAMW6432}/flann"
++    PATH_SUFFIXES lib)
++  endif(NOT _CMAKE_MCOS_ROS_RTL)
+ 
+   find_package_handle_standard_args(Flann DEFAULT_MSG FLANN_LIBRARY FLANN_INCLUDE_DIRS)
+   if(FLANN_FOUND)
