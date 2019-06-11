@@ -6,4 +6,4 @@ eMCOSの詳細は以下を参照してください。
 https://www.esol.co.jp/embedded/emcos.html
 
 導入手順は以下を参照してください。  
-[ros_rtl_toolchain/Readme.md](../ros_rtl_toolchain/Readme.md)
+[ros_rtl_toolchain/Readme.md](https://github.com/esol-community/ros_rtl_toolchain)
